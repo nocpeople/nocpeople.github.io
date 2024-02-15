@@ -5,10 +5,10 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="/2023/12/10/hello-world/"/>
-    <url>/2023/12/10/hello-world/</url>
+    <link href="/2024/02/15/Hello-World/"/>
+    <url>/2024/02/15/Hello-World/</url>
     
-    <content type="html"><![CDATA[<p>终于有自己的博客啦！！！小梅同学好棒呀！！</p>]]></content>
+    <content type="html"><![CDATA[<p>终于有自己的博客啦！！！小梅同学好棒呀！！！<br>希望自己真的能做到像博客页脚上写的那样 “不要被任何人左右你的情绪”</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(<span class="hljs-string">&#x27;不要被任何人左右你的情绪&#x27;</span>);<br></code></pre></td></tr></table></figure>]]></content>
     
     
     <categories>
