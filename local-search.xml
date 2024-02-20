@@ -4,11 +4,24 @@
   
   
   <entry>
+    <title>test</title>
+    <link href="/2024/02/16/test/"/>
+    <url>/2024/02/16/test/</url>
+    
+    <content type="html"><![CDATA[<p><img src="/2024/02/16/test/b.png" alt="图片"></p>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Hello World</title>
     <link href="/2024/02/15/Hello-World2/"/>
     <url>/2024/02/15/Hello-World2/</url>
     
-    <content type="html"><![CDATA[<p>终于有自己的博客啦！！！小梅同学好棒呀！！！<br>希望自己真的能做到像博客页脚上写的那样 “不要被任何人左右你的情绪”</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(<span class="hljs-string">&#x27;不要被任何人左右你的情绪&#x27;</span>);<br></code></pre></td></tr></table></figure>]]></content>
+    <content type="html"><![CDATA[<p>终于有自己的博客啦！！！小梅同学好棒呀！！！<br>希望自己真的能做到像博客页脚上写的那样 “不要被任何人左右你的情绪”</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">System.out.println(<span class="hljs-string">&#x27;不要被任何人左右你的情绪&#x27;</span>);<br></code></pre></td></tr></table></figure><p><img src="/2024/02/15/Hello-World2/img.png" alt="图片"></p>]]></content>
     
     
     <categories>
